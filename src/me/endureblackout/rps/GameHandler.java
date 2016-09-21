@@ -20,6 +20,7 @@ import me.endureblackout.rps.utils.IconMenu.OptionClickEvent;
 public class GameHandler implements Listener {
 	
 	public Map<UUID, String> picked = new HashMap<UUID, String>();
+	public Map<UUID, Integer> stats = new HashMap<UUID, Integer>();
 	
 	ItemStack rock = new ItemStack(Material.STONE);
 	ItemMeta rockMeta = rock.getItemMeta();
@@ -82,12 +83,21 @@ public class GameHandler implements Listener {
 						System.out.print("working");
 						for(Player p1 : Bukkit.getOnlinePlayers()) {
 							for(Player p2 : Bukkit.getOnlinePlayers()) {
-								if(p1.getUniqueId().equals(k.getKey()) || p1.getUniqueId().equals(k.getValue())) {
-									if(p2.getUniqueId().equals(k.getKey()) || p2.getUniqueId().equals(k.getValue())) {
-										if(picked.get(k.getKey()).equals("paper") && picked.get(k.getValue()).equals("rock")) {
-											p1.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
-											p2.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
-										}
+								if(p1.getUniqueId().equals(k.getKey()) && p2.getUniqueId().equals(k.getValue())) {
+									if(picked.get(k.getKey()).equals("paper") && picked.get(k.getValue()).equals("rock")) {
+										p1.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
+										p2.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
+										picked.remove(k.getKey());
+										picked.remove(k.getValue());
+										menu.open(p1);
+										menu.open(p2);
+										return;
+									} else if(picked.get(k.getKey()).equals("rock") && picked.get(k.getValue()).equals("paper")) {
+										p1.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
+										p2.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
+										menu.open(p1);
+										menu.open(p2);
+										return;
 									}
 								}
 							}

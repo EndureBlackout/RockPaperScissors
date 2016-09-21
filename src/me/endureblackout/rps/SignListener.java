@@ -17,8 +17,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import me.endureblackout.rps.GameHandler;
-
 public class SignListener implements Listener {
 	RPSMain plugin;
 	
@@ -72,8 +70,8 @@ public class SignListener implements Listener {
 							p.sendMessage(ChatColor.GOLD + "[RPS] You are now in a game with " + p1.getName());
 							p1.sendMessage(ChatColor.GOLD + "[RPS] You are now in a game with " + p.getName());
 							
-							GameHandler.menu.open(p);
-							GameHandler.menu.open(p1);
+							plugin.openInv(p);
+							plugin.openInv(p1);
 						}
 					}
 				}
