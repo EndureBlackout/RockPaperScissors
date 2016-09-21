@@ -1,0 +1,5 @@
+name: RockPaperScissors
+main: me.endureblackout.rps.RPSMain
+version: 1.0
+description: RockPaperScissors Minigame
+author: [EndureBlackout]

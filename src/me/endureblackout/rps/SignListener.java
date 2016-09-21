@@ -8,13 +8,16 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import me.endureblackout.rps.GameHandler;
 
 public class SignListener implements Listener {
 	RPSMain plugin;
@@ -23,19 +26,15 @@ public class SignListener implements Listener {
 		this.plugin = instance;
 	}
 	
-	public Map<UUID, UUID> inGame = new HashMap<UUID, UUID>();
+	public static Map<UUID, UUID> inGame = new HashMap<UUID, UUID>();
 	public List<UUID> waitingGame = new ArrayList<UUID>();
 	
 	@EventHandler
-	public void onPlace(BlockPlaceEvent e) {
-		if(e.getBlock().getType().toString().equalsIgnoreCase("SIGN")) {
-			Sign sign = (Sign)e.getBlock();
-			
-			if(sign.getLine(0).equalsIgnoreCase("[rps]") && sign.getLine(1).equalsIgnoreCase("JoinRandom")) {
-				sign.setLine(0, ChatColor.WHITE + "R" + ChatColor.GRAY + "-" + ChatColor.WHITE + "P" + ChatColor.GRAY + "-" + ChatColor.WHITE + "S");
-				sign.setLine(1, ChatColor.WHITE + "Join Game");
-				sign.setLine(3, ChatColor.DARK_GRAY + "" + ChatColor.UNDERLINE + "Click to Join");
-			}
+	public void onPlace(SignChangeEvent e) {
+		if(e.getLine(0).equalsIgnoreCase("[rps]") && e.getLine(1).equalsIgnoreCase("JoinRandom")) {
+			e.setLine(0, ChatColor.WHITE + "R" + ChatColor.GRAY + "-" + ChatColor.WHITE + "P" + ChatColor.GRAY + "-" + ChatColor.WHITE + "S");
+			e.setLine(1, ChatColor.WHITE + "Join Game");
+			e.setLine(3, ChatColor.DARK_GRAY + "" + ChatColor.UNDERLINE + "Click to Join");
 		}
 	}
 	
@@ -43,19 +42,27 @@ public class SignListener implements Listener {
 	public void onInteract(PlayerInteractEvent e) {
 		if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
 			Player p = e.getPlayer();
-			String type = e.getClickedBlock().getType().toString();
-			if(type.endsWith("SIGN")) {
-				Sign sign = (Sign)e.getClickedBlock();
-				
-				if(sign.getLine(0).equalsIgnoreCase("[rps]") && sign.getLine(1).equalsIgnoreCase(ChatColor.stripColor("Join Game")) && waitingGame.size() < 1) {
+			
+			if(e.getClickedBlock().getType() == Material.WALL_SIGN) {
+				Sign sign = (Sign)e.getClickedBlock().getState();
+
+				if(ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("r-p-s") && ChatColor.stripColor(sign.getLine(1)).equalsIgnoreCase("join game") && waitingGame.isEmpty()) {
+					
 					if(!(waitingGame.contains(p.getUniqueId()))) {
 						waitingGame.add(p.getUniqueId());
 						p.sendMessage(ChatColor.GOLD + "[RPS] You have been added to the queue");
 					} else {
 						p.sendMessage(ChatColor.RED + "[RPS] You are already in the queue");
 					}
-				} else if(sign.getLine(0).equalsIgnoreCase("[rps]") && sign.getLine(1).equalsIgnoreCase(ChatColor.stripColor("Join Game")) && waitingGame.size() >= 1) {
-					UUID pID = waitingGame.get(1);
+				} else if(ChatColor.stripColor(sign.getLine(0)).equalsIgnoreCase("r-p-s") && ChatColor.stripColor(sign.getLine(1)).equalsIgnoreCase("join game") && waitingGame.size() >= 1) {
+					
+					if(waitingGame.contains(p.getUniqueId())) {
+						p.sendMessage(ChatColor.RED + "[RPS] You are already in the queue");
+						return;
+					}
+					
+					UUID pID = waitingGame.get(0);
+					
 					waitingGame.remove(pID);
 					
 					inGame.put(p.getUniqueId(), pID);
@@ -64,6 +71,9 @@ public class SignListener implements Listener {
 						if(p1.getUniqueId().equals(pID)) {
 							p.sendMessage(ChatColor.GOLD + "[RPS] You are now in a game with " + p1.getName());
 							p1.sendMessage(ChatColor.GOLD + "[RPS] You are now in a game with " + p.getName());
+							
+							GameHandler.menu.open(p);
+							GameHandler.menu.open(p1);
 						}
 					}
 				}
