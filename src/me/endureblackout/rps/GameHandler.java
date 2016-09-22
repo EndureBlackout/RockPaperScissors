@@ -56,7 +56,6 @@ public class GameHandler implements Listener {
 		menu.setOption(7, scissors);
 	}
 	
-	@SuppressWarnings("deprecation")
 	public void itemClick(OptionClickEvent e) {
 		Player p = e.getPlayer();
 		e.willClose();
@@ -76,36 +75,61 @@ public class GameHandler implements Listener {
 			p.sendMessage(ChatColor.GOLD + "[RPS] You picked scissors");
 		}
 		
-		Bukkit.getServer().getScheduler().scheduleAsyncDelayedTask(this.plugin, new BukkitRunnable() {
+		new BukkitRunnable() {
 			public void run() {
 				for(Entry<UUID, UUID> k : SignListener.inGame.entrySet()) {
-					if(picked.containsKey(k.getKey()) && picked.containsKey(k.getValue())) {
-						System.out.print("working");
-						for(Player p1 : Bukkit.getOnlinePlayers()) {
-							for(Player p2 : Bukkit.getOnlinePlayers()) {
-								if(p1.getUniqueId().equals(k.getKey()) && p2.getUniqueId().equals(k.getValue())) {
-									if(picked.get(k.getKey()).equals("paper") && picked.get(k.getValue()).equals("rock")) {
-										p1.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
-										p2.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
-										picked.remove(k.getKey());
-										picked.remove(k.getValue());
-										menu.open(p1);
-										menu.open(p2);
-										return;
-									} else if(picked.get(k.getKey()).equals("rock") && picked.get(k.getValue()).equals("paper")) {
-										p1.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
-										p2.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
-										menu.open(p1);
-										menu.open(p2);
-										return;
-									}
-								}
+
+						Player p1 = Bukkit.getPlayer(k.getKey());
+						Player p2 = Bukkit.getPlayer(k.getValue());
+						
+					if(picked.containsKey(p1.getUniqueId()) && picked.containsKey(p2.getUniqueId())) {
+						if(p1.getUniqueId().equals(k.getKey()) && p2.getUniqueId().equals(k.getValue())) {
+							if(picked.get(k.getKey()).equals("paper") && picked.get(k.getValue()).equals("rock")) {
+								p1.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
+								p2.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
+								picked.remove(k.getKey());
+								picked.remove(k.getValue());
+								menu.open(p1);
+								menu.open(p2);
+								return;
+							} else if(picked.get(k.getKey()).equals("rock") && picked.get(k.getValue()).equals("paper")) {
+								p1.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
+								p2.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
+								picked.remove(k.getKey());
+								picked.remove(k.getValue());
+								menu.open(p1);
+								menu.open(p2);
+								return;
+							} else if(picked.get(k.getKey()).equals("scissors") && picked.get(k.getValue()).equals("paper")) {
+								p1.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
+								p2.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
+								picked.remove(k.getKey());
+								picked.remove(k.getValue());
+								menu.open(p1);
+								menu.open(p2);
+								return;
+							} else if(picked.get(k.getKey()).equals("paper") && picked.get(k.getValue()).equals("scissors")) {
+								p1.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
+								p2.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
+								picked.remove(k.getKey());
+								picked.remove(k.getValue());
+								menu.open(p1);
+								menu.open(p2);
+								return;
+							} else if(picked.get(k.getKey()).equals("scissors") && picked.get(k.getValue()).equals("rock")) {
+								p1.sendMessage(ChatColor.GOLD + "[RPS] You won that round!");
+								p2.sendMessage(ChatColor.GOLD + "[RPS] You lost that round!");
+								picked.remove(k.getKey());
+								picked.remove(k.getValue());
+								menu.open(p1);
+								menu.open(p2);
+								return;
 							}
-						}	
+						}
 					}
-				}
+				}	
 			}
-		}, 10 * 20);
+		}.runTaskLater(this.plugin, 10*20);
 	}
 	
 }
